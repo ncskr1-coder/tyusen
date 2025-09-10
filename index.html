@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>歌う曲ルーレット</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#151922; --muted:#8b93a6; --accent:#6ae3ff; --accent2:#a1ff9f; --text:#e8ecf1;
+    }
+    html,body{height:100%}
+    body{margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "YuGothic", Meiryo, sans-serif; background: radial-gradient(1200px 700px at 70% -10%, #1a2030 0%, #0f1115 60%); color:var(--text)}
+    .container{max-width:1080px; margin:0 auto; padding:28px}
+    h1{font-weight:800; letter-spacing:0.02em; font-size:clamp(22px,4vw,34px); display:flex; align-items:center; gap:.5rem}
+    h1 .dot{width:.75em;height:.75em;border-radius:9999px;background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 0 20px rgba(106,227,255,.6)}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:24px}
+    @media (max-width:960px){.grid{grid-template-columns:1fr}}
+    .card{background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.08); border-radius:18px; box-shadow:0 10px 40px rgba(0,0,0,.25); padding:18px}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .row > *{flex:0 0 auto}
+    .grow{flex:1 1 auto}
+    label{font-size:12px; color:var(--muted)}
+    textarea{width:100%; min-height:260px; resize:vertical; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f121a; color:var(--text); padding:12px; line-height:1.5}
+    input[type="text"], input[type="number"]{border-radius:10px; border:1px solid rgba(255,255,255,.1); background:#0f121a; color:var(--text); padding:10px 12px; width:100%}
+    input[type="file"]{color:var(--muted)}
+    button{appearance:none; border:0; border-radius:12px; padding:12px 16px; font-weight:700; color:#061018; background:linear-gradient(135deg,var(--accent),var(--accent2)); cursor:pointer; box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    button.ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.14)}
+    button:disabled{opacity:.6; cursor:not-allowed}
+    .pill{display:inline-flex; gap:.5rem; align-items:center; padding:6px 10px; border-radius:9999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); font-size:12px; color:var(--muted)}
+    .roulette{display:grid; place-items:center; height:280px; border-radius:18px; background: radial-gradient(600px 240px at 50% -40%, rgba(106,227,255,.25), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.08); position:relative; overflow:hidden}
+    .roulette .glow{position:absolute; inset:0; background: radial-gradient(250px 120px at 70% 0%, rgba(161,255,159,.12), transparent 50%); pointer-events:none}
+    .name{font-weight:900; letter-spacing:.02em; text-align:center; padding:0 12px; font-size: clamp(28px, 5vw, 56px)}
+    .sub{font-size:12px; color:var(--muted); margin-top:8px}
+    .history{display:flex; flex-wrap:wrap; gap:8px}
+    .tag{font-size:12px; padding:6px 10px; border-radius:9999px; background:#0f121a; border:1px solid rgba(255,255,255,.08); color:var(--muted)}
+    .stats{display:flex; gap:8px; flex-wrap:wrap}
+    .divider{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); margin:14px 0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="dot"></span> 歌う曲ルーレット</h1>
+
+    <div class="grid">
+      <!-- 左：入力と設定 -->
+      <section class="card">
+        <div class="row" style="justify-content:space-between; align-items:baseline">
+          <div>
+            <div class="pill">曲一覧をテキストで入力（1行=1曲）</div>
+          </div>
+          <div class="stats">
+            <span class="pill" id="stat-total">総曲数: 0</span>
+            <span class="pill" id="stat-remaining">未抽選: 0</span>
+          </div>
+        </div>
+        <textarea id="songs" placeholder="例
+EYE
+アイネクライネ
+阿修羅ちゃん
+...
+"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="saveList" class="ghost">リスト保存</button>
+          <button id="loadList" class="ghost">保存を読み込み</button>
+          <button id="clearHistory" class="ghost">履歴/周回をリセット</button>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div class="grow">
+            <label for="fontFamily">フォント（CSSフォント名）</label>
+            <input id="fontFamily" type="text" placeholder="例: &quot;Noto Sans JP&quot;, &quot;Hiragino Kaku Gothic ProN&quot;, sans-serif" />
+          </div>
+          <div style="width:180px">
+            <label for="fontSize">表示サイズ(px)</label>
+            <input id="fontSize" type="number" min="16" max="128" value="48" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div class="grow">
+            <label for="fontFile">カスタムフォント（.ttf/.otf）</label>
+            <input id="fontFile" type="file" accept=".ttf,.otf,.woff,.woff2" />
+          </div>
+          <div style="width:220px">
+            <label for="duration">回転時間(秒)</label>
+            <input id="duration" type="number" min="1" max="20" step="0.5" value="3.5" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 右：ルーレットと操作 -->
+      <section class="card">
+        <div class="roulette" id="roulette">
+          <div class="glow"></div>
+          <div class="name" id="display">曲名がここに表示</div>
+          <div class="sub" id="hint">「抽選スタート」を押してください</div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button id="start">抽選スタート</button>
+          <button id="stop" class="ghost" disabled>ストップ</button>
+          <button id="pickNext" class="ghost">即抽選</button>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <label>直近の履歴</label>
+          <div class="history" id="history"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // --- 状態管理 ---
+    const state = {
+      songs: [],          // 曲名全体
+      bag: [],            // 周回用バッグ（未抽選優先: なくなるまで重複なし）
+      lastPick: null,     // 直前の曲
+      spinning: false,
+      spinTimer: null,
+      history: [],        // 直近の表示履歴（UI用）
+    };
+
+    const els = {
+      songs: document.getElementById('songs'),
+      total: document.getElementById('stat-total'),
+      remaining: document.getElementById('stat-remaining'),
+      display: document.getElementById('display'),
+      hint: document.getElementById('hint'),
+      start: document.getElementById('start'),
+      stop: document.getElementById('stop'),
+      pickNext: document.getElementById('pickNext'),
+      history: document.getElementById('history'),
+      roulette: document.getElementById('roulette'),
+      fontFamily: document.getElementById('fontFamily'),
+      fontSize: document.getElementById('fontSize'),
+      fontFile: document.getElementById('fontFile'),
+      duration: document.getElementById('duration'),
+      saveList: document.getElementById('saveList'),
+      loadList: document.getElementById('loadList'),
+      clearHistory: document.getElementById('clearHistory'),
+    };
+
+    // --- ユーティリティ ---
+    const uniq = (arr) => {
+      const seen = new Set();
+      const out = [];
+      for (const s of arr) {
+        const t = s.trim();
+        if (!t) continue;
+        const key = t.toLowerCase();
+        if (!seen.has(key)) { seen.add(key); out.push(t); }
+      }
+      return out;
+    }
+
+    const shuffle = (arr) => {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    const parseSongs = () => {
+      const lines = els.songs.value.split(/\r?\n|,|；|;|、/);
+      state.songs = uniq(lines);
+      if (state.songs.length === 0) {
+        state.bag = [];
+      } else if (state.bag.length === 0) {
+        refillBag();
+      } else {
+        // 曲の変更があった場合、現在のバッグを新リストに合わせてフィルタ
+        state.bag = state.bag.filter(x => state.songs.includes(x));
+        // 新曲はバッグに追加
+        for (const s of state.songs) if (!state.bag.includes(s)) state.bag.push(s);
+      }
+      updateStats();
+    }
+
+    const refillBag = () => {
+      state.bag = shuffle([...state.songs]);
+      // 直前と同じで始まらないよう工夫
+      if (state.lastPick && state.bag.length > 1 && state.bag[0] === state.lastPick) {
+        const idx = Math.floor(Math.random() * (state.bag.length - 1)) + 1;
+        [state.bag[0], state.bag[idx]] = [state.bag[idx], state.bag[0]];
+      }
+      updateStats();
+    }
+
+    const updateStats = () => {
+      els.total.textContent = `総曲数: ${state.songs.length}`;
+      els.remaining.textContent = `未抽選: ${state.bag.length}`;
+    }
+
+    const pushHistory = (name) => {
+      state.history.unshift(name);
+      if (state.history.length > 12) state.history.pop();
+      els.history.innerHTML = state.history.map(n => `<span class=\"tag\">${escapeHtml(n)}</span>`).join('');
+    }
+
+    const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    // --- 抽選ロジック（未抽選優先 / 連続同一防止） ---
+    const pickFromBag = () => {
+      if (state.songs.length === 0) return null;
+      if (state.bag.length === 0) refillBag();
+
+      // バッグに1つだけ残っていて、それが直前と同じならリフィルしてから選び直す
+      if (state.bag.length === 1 && state.bag[0] === state.lastPick && state.songs.length > 1) {
+        refillBag();
+      }
+
+      // 直前と同じを避ける（可能なら入れ替え）
+      if (state.bag.length > 1 && state.bag[0] === state.lastPick) {
+        const idx = Math.floor(Math.random() * (state.bag.length - 1)) + 1;
+        [state.bag[0], state.bag[idx]] = [state.bag[idx], state.bag[0]];
+      }
+
+      const pick = state.bag.shift();
+      state.lastPick = pick;
+      updateStats();
+      return pick;
+    }
+
+    // --- ルーレットアニメーション ---
+    let rafId = null;
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    const spin = (durationMs) => new Promise((resolve) => {
+      if (state.songs.length === 0) return resolve(null);
+      state.spinning = true;
+      els.start.disabled = true; els.stop.disabled = false; els.pickNext.disabled = true;
+      els.hint.textContent = '回っています…';
+
+      const start = performance.now();
+
+      const step = (now) => {
+        const elapsed = now - start;
+        const t = Math.min(1, elapsed / durationMs);
+        const k = easeOutCubic(t); // 最初速く、だんだん遅く
+
+        // 表示更新頻度：最初は高速、最後は低速
+        const minHz = 2, maxHz = 35; // 表示切替の頻度
+        const hz = maxHz - (maxHz - minHz) * k;
+        const interval = 1000 / hz;
+
+        if (!spin.last || now - spin.last >= interval) {
+          spin.last = now;
+          // ランダムに候補をチラ見せ（未抽選優先を崩さないためsongs全体からランダム表示のみ）
+          const name = state.songs[Math.floor(Math.random() * state.songs.length)] || '';
+          applyDisplay(name);
+        }
+
+        if (t < 1 && state.spinning) {
+          rafId = requestAnimationFrame(step);
+        } else {
+          state.spinning = false; spin.last = 0;
+          els.stop.disabled = true; els.pickNext.disabled = false; els.start.disabled = false;
+          // 確定抽選
+          const final = pickFromBag();
+          if (final) {
+            applyDisplay(final, true);
+            pushHistory(final);
+            saveState();
+          }
+          resolve(final);
+        }
+      }
+      rafId = requestAnimationFrame(step);
+    });
+
+    const stopSpinEarly = () => {
+      if (!state.spinning) return;
+      state.spinning = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      // 即時確定
+      const final = pickFromBag();
+      if (final) {
+        applyDisplay(final, true);
+        pushHistory(final);
+        saveState();
+      }
+      els.stop.disabled = true; els.pickNext.disabled = false; els.start.disabled = false;
+    }
+
+    const applyDisplay = (text, highlight=false) => {
+      els.display.textContent = text || '—';
+      els.display.style.transform = highlight ? 'scale(1.04)' : 'scale(1)';
+      els.display.style.textShadow = highlight ? '0 8px 30px rgba(106,227,255,.35)' : 'none';
+      if (highlight) {
+        els.roulette.animate([
+          { filter:'brightness(1)' },
+          { filter:'brightness(1.15)' },
+          { filter:'brightness(1)' }
+        ], { duration: 420, easing:'cubic-bezier(.2,.9,.2,1)'});
+        els.hint.textContent = '抽選結果';
+      }
+      // フォント設定反映
+      const fam = els.fontFamily.value.trim();
+      const size = parseInt(els.fontSize.value || '48', 10);
+      els.display.style.fontFamily = fam || '';
+      els.display.style.fontSize = size + 'px';
+    }
+
+    // --- 永続化（localStorage） ---
+    const saveState = () => {
+      const data = {
+        songsText: els.songs.value,
+        lastPick: state.lastPick,
+        bag: state.bag,
+        history: state.history,
+        fontFamily: els.fontFamily.value,
+        fontSize: els.fontSize.value,
+        duration: els.duration.value
+      };
+      localStorage.setItem('sing-roulette:v1', JSON.stringify(data));
+    }
+
+    const loadState = () => {
+      const raw = localStorage.getItem('sing-roulette:v1');
+      if (!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        if (typeof data.songsText === 'string') els.songs.value = data.songsText;
+        if (Array.isArray(data.bag)) state.bag = data.bag;
+        if (typeof data.lastPick === 'string') state.lastPick = data.lastPick;
+        if (Array.isArray(data.history)) state.history = data.history;
+        if (data.fontFamily) els.fontFamily.value = data.fontFamily;
+        if (data.fontSize) els.fontSize.value = data.fontSize;
+        if (data.duration) els.duration.value = data.duration;
+        parseSongs();
+        applyDisplay(state.lastPick || '');
+        pushHistory(''); // 再描画
+        state.history.shift();
+      }catch(e){ console.warn(e); }
+    }
+
+    // --- フォントアップロード ---
+    els.fontFile.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const buf = await file.arrayBuffer();
+      const font = new FontFace('CustomUploadedFont', buf);
+      await font.load();
+      document.fonts.add(font);
+      els.fontFamily.value = 'CustomUploadedFont, ' + (els.fontFamily.value || 'sans-serif');
+      applyDisplay(els.display.textContent || '');
+      saveState();
+    });
+
+    // --- イベント ---
+    els.songs.addEventListener('input', () => { parseSongs(); saveState(); });
+    els.fontFamily.addEventListener('input', () => { applyDisplay(els.display.textContent || ''); saveState(); });
+    els.fontSize.addEventListener('input', () => { applyDisplay(els.display.textContent || ''); saveState(); });
+    els.duration.addEventListener('input', () => saveState());
+
+    els.start.addEventListener('click', async () => {
+      parseSongs();
+      if (state.songs.length === 0) { els.hint.textContent = '曲を入力してください'; return; }
+      spin(parseFloat(els.duration.value) * 1000);
+    });
+
+    els.stop.addEventListener('click', stopSpinEarly);
+
+    els.pickNext.addEventListener('click', () => {
+      parseSongs();
+      const final = pickFromBag();
+      if (final) { applyDisplay(final, true); pushHistory(final); saveState(); }
+    });
+
+    els.saveList.addEventListener('click', () => { saveState();
+      els.hint.textContent = '保存しました（ブラウザ内）';
+    });
+
+    els.loadList.addEventListener('click', () => { loadState(); els.hint.textContent = '保存から読み込みました'; });
+
+    els.clearHistory.addEventListener('click', () => {
+      state.lastPick = null; state.history = []; refillBag(); saveState();
+      els.history.innerHTML = ''; applyDisplay('', false); els.hint.textContent = '履歴と周回をリセットしました';
+    });
+
+    // --- 初期化 ---
+    loadState();
+    parseSongs();
+    updateStats();
+  </script>
+</body>
+</html>
