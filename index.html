@@ -98,25 +98,17 @@
     }
     .roulette .glow{display:none}
 
-    .name{
-      font-weight:900;
-      letter-spacing:.02em;
-      text-align:center;
-      padding:0 12px;
-      font-size: clamp(28px, 5vw, 56px);
+.name{
+  font-family: "花とちょうちょ";
+  font-weight: 400;
+  letter-spacing: .04em;
+  text-align:center;
+  padding:0 12px;
 
-      /* ✅ フォントは日本語名「花とちょうちょ」のみに固定 */
-      font-family: "花とちょうちょ";
-
-      /* ✅ テキスト色は白 */
-      color: #ffffff;
-
-      /* ✅ 1行固定 + 省略 */
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
     .sub{font-size:12px; color:var(--muted); margin-top:8px}
     .history{display:flex; flex-wrap:wrap; gap:8px}
