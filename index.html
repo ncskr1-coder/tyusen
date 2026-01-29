@@ -9,6 +9,9 @@
     :root{
       --bg:#0f1115; --card:#151922; --muted:#8b93a6;
       --accent:#6ae3ff; --accent2:#a1ff9f; --text:#e8ecf1;
+
+      /* 🎥 クロマキー用グリーン */
+      --chroma-green:#00ff00;
     }
 
     html,body{height:100%}
@@ -17,172 +20,108 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto,
         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
         "Yu Gothic UI", "YuGothic", Meiryo, sans-serif;
-      background: radial-gradient(1200px 700px at 70% -10%, #1a2030 0%, #0f1115 60%);
+      background:#000; /* OBS用なら黒でOK */
       color:var(--text)
     }
 
     .container{max-width:1080px; margin:0 auto; padding:28px}
-    h1{font-weight:800; letter-spacing:0.02em; font-size:clamp(22px,4vw,34px); display:flex; align-items:center; gap:.5rem}
-    h1 .dot{width:.75em;height:.75em;border-radius:9999px;background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 0 20px rgba(106,227,255,.6)}
     .grid{display:grid; grid-template-columns: 1fr 1fr; gap:24px}
     @media (max-width:960px){.grid{grid-template-columns:1fr}}
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-      border:1px solid rgba(255,255,255,.08);
+      background: #111;
       border-radius:18px;
-      box-shadow:0 10px 40px rgba(0,0,0,.25);
       padding:18px
     }
 
-    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
-    .row > *{flex:0 0 auto}
-    .grow{flex:1 1 auto}
-    label{font-size:12px; color:var(--muted)}
-
-    textarea{
-      width:100%; min-height:260px; resize:vertical;
-      border-radius:12px; border:1px solid rgba(255,255,255,.1);
-      background:#0f121a; color:var(--text);
-      padding:12px; line-height:1.5
-    }
-
-    input[type="number"]{
-      border-radius:10px; border:1px solid rgba(255,255,255,.1);
-      background:#0f121a; color:var(--text);
-      padding:10px 12px; width:100%
-    }
-
-    button{
-      appearance:none; border:0; border-radius:12px;
-      padding:12px 16px; font-weight:700;
-      color:#061018;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      cursor:pointer;
-      box-shadow:0 8px 24px rgba(0,0,0,.35)
-    }
-
-    button.ghost{
-      background:transparent;
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.14)
-    }
-
-    button:disabled{opacity:.6; cursor:not-allowed}
-
-    .pill{
-      display:inline-flex; gap:.5rem; align-items:center;
-      padding:6px 10px; border-radius:9999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      font-size:12px; color:var(--muted)
-    }
-
     .roulette{
-      display:grid; place-items:center;
-      height:280px; border-radius:18px;
-      background:
-        radial-gradient(600px 240px at 50% -40%, rgba(106,227,255,.25), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-      border:1px solid rgba(255,255,255,.08);
-      position:relative; overflow:hidden
-    }
-
-    .roulette .glow{
-      position:absolute; inset:0;
-      background: radial-gradient(250px 120px at 70% 0%, rgba(161,255,159,.12), transparent 50%);
-      pointer-events:none
-    }
-
-    .name{
-      font-weight:900;
-      letter-spacing:.02em;
-      text-align:center;
-      padding:0 12px;
-      font-size:clamp(28px,5vw,56px)
+      display:grid;
+      place-items:center;
+      height:160px;
+      border-radius:12px;
+      background:#111;
+      position:relative;
+      overflow:hidden
     }
 
     /* ===============================
-       結果表示（PC内フォント名指定）
+       🎯 結果表示（クロマキー対応）
        =============================== */
     #display{
       font-family:
         "花とちょうちょ",
-        "Hana To Chouchou",
         "HanaToChouchou",
         "Noto Sans JP",
-        "Hiragino Kaku Gothic ProN",
         Meiryo,
         sans-serif;
+
+      font-size:20px;           /* ✅ デフォルト 20px */
+      font-weight:400;
+      letter-spacing:.05em;
+
+      background: var(--chroma-green); /* ✅ クロマキー用 */
+      color:#000;               /* 抜きやすいよう黒文字 */
+
+      padding:10px 16px;
+      border-radius:6px;
 
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 100%;
+      max-width:100%;
     }
 
-    .sub{font-size:12px; color:var(--muted); margin-top:8px}
-    .history{display:flex; flex-wrap:wrap; gap:8px}
-    .tag{
-      font-size:12px; padding:6px 10px;
-      border-radius:9999px;
-      background:#0f121a;
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--muted)
+    .sub{font-size:12px; color:#aaa; margin-top:6px}
+
+    textarea{
+      width:100%;
+      min-height:200px;
+      background:#000;
+      color:#fff;
     }
 
-    .stats{display:flex; gap:8px; flex-wrap:wrap}
-    .divider{
-      height:1px;
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-      margin:14px 0
+    input[type="number"]{
+      background:#000;
+      color:#fff;
+    }
+
+    button{
+      margin-top:12px;
+      padding:10px 16px;
+      font-weight:700;
+      cursor:pointer;
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1><span class="dot"></span> 歌う曲ルーレット</h1>
-
     <div class="grid">
-      <!-- 左 -->
+      <!-- 左：曲入力 -->
       <section class="card">
-        <div class="row" style="justify-content:space-between; align-items:baseline">
-          <div class="pill">曲一覧（1行=1曲）</div>
-          <div class="stats">
-            <span class="pill" id="stat-total">総曲数: 0</span>
-            <span class="pill" id="stat-remaining">未抽選: 0</span>
+        <textarea id="songs" placeholder="1行=1曲"></textarea>
+
+        <div style="display:flex; gap:12px; margin-top:10px">
+          <div>
+            <label>表示サイズ(px)</label>
+            <input id="fontSize" type="number" value="20" />
           </div>
-        </div>
-
-        <textarea id="songs"></textarea>
-
-        <div class="divider"></div>
-
-        <div class="row">
-          <div style="width:180px">
-            <label for="fontSize">表示サイズ(px)</label>
-            <input id="fontSize" type="number" min="16" max="128" value="48" />
-          </div>
-          <div style="width:180px">
-            <label for="maxChars">最大文字数</label>
-            <input id="maxChars" type="number" min="5" max="200" value="28" />
+          <div>
+            <label>最大文字数</label>
+            <input id="maxChars" type="number" value="28" />
           </div>
         </div>
       </section>
 
-      <!-- 右 -->
+      <!-- 右：表示 -->
       <section class="card">
-        <div class="roulette" id="roulette">
-          <div class="glow"></div>
-          <div class="name" id="display">曲名がここに表示</div>
-          <div class="sub" id="hint">「抽選スタート」を押してください</div>
+        <div class="roulette">
+          <div id="display">曲名がここに表示</div>
         </div>
+        <div class="sub" id="hint">抽選スタート</div>
 
-        <div class="row" style="margin-top:14px">
-          <button id="start">抽選スタート</button>
-          <button id="stop" class="ghost" disabled>ストップ</button>
-        </div>
+        <button id="start">抽選スタート</button>
+        <button id="stop">ストップ</button>
       </section>
     </div>
   </div>
@@ -195,41 +134,35 @@
       stop: document.getElementById('stop'),
       fontSize: document.getElementById('fontSize'),
       maxChars: document.getElementById('maxChars'),
-      hint: document.getElementById('hint'),
-      roulette: document.getElementById('roulette')
+      hint: document.getElementById('hint')
     };
 
-    let songs = [];
+    let list = [];
     let spinning = false;
     let rafId = null;
 
     const clampText = (s, max) => {
-      s = (s ?? '').replace(/\r?\n/g, ' ');
-      if (max <= 0) return s;
-      return s.length > max ? s.slice(0, max) + '…' : s;
+      s = (s ?? '').replace(/\r?\n/g,' ');
+      return s.length > max ? s.slice(0,max) + '…' : s;
     };
 
     const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
-    const spin = (durationMs = 3500) => {
-      if (!songs.length) return;
+    const spin = (duration = 3000) => {
+      if (!list.length) return;
       spinning = true;
-      els.start.disabled = true;
-      els.stop.disabled = false;
       els.hint.textContent = '回っています…';
-
       const start = performance.now();
 
       const step = now => {
-        const t = Math.min(1, (now - start) / durationMs);
+        const t = Math.min(1, (now - start) / duration);
         const k = easeOutCubic(t);
-
         const hz = 30 - 25 * k;
         const interval = 1000 / hz;
 
         if (!step.last || now - step.last > interval) {
           step.last = now;
-          const name = songs[Math.floor(Math.random() * songs.length)];
+          const name = list[Math.floor(Math.random()*list.length)];
           els.display.textContent = clampText(name, +els.maxChars.value);
         }
 
@@ -238,21 +171,16 @@
         } else {
           spinning = false;
           step.last = 0;
-          els.start.disabled = false;
-          els.stop.disabled = true;
-
-          const final = songs[Math.floor(Math.random() * songs.length)];
+          const final = list[Math.floor(Math.random()*list.length)];
           els.display.textContent = clampText(final, +els.maxChars.value);
           els.hint.textContent = '抽選結果';
         }
       };
-
       rafId = requestAnimationFrame(step);
     };
 
     els.start.onclick = () => {
-      songs = els.songs.value.split(/\r?\n|,|、/).map(s => s.trim()).filter(Boolean);
-      if (!songs.length) return;
+      list = els.songs.value.split(/\r?\n|,|、/).map(s=>s.trim()).filter(Boolean);
       spin();
     };
 
